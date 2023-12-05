@@ -74,11 +74,8 @@ int main(int argc, char *argv[])
 	list_init(&(tp->head));
 	for (unsigned int i = 0; i < graph->num_nodes; i++) {
 		if (graph->visited[i] == 0) {
-				if (graph->nodes[i]->num_neighbours != 0)
-				{
 			os_task_t *task = create_task((void *)process_node, (void *)(intptr_t)i, NULL);
 			enqueue_task(tp, task);
-				}
 		}
 	}
 	wait_for_completion(tp);

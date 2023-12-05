@@ -16,7 +16,7 @@ void setnrnoduriglobal(int n)
 {
 	nrnoduriglobal = n;
 }
-void incrementnrvizitate()
+void incrementnrvizitate(void)
 {
 	nrnodurivizitateblobal++;
 }
@@ -80,11 +80,11 @@ os_task_t *dequeue_task(os_threadpool_t *tp)
 	/* TODO: Dequeue task from the shared task queue. Use synchronization. */
 	pthread_mutex_lock(&tp->mutex);
 	t = NULL;
-	if (!queue_is_empty(tp))
-	{
+	if (!queue_is_empty(tp)) {
 		os_list_node_t *node = tp->head.next;
 		list_del(node);
 		t = list_entry(node, os_task_t, list);
+
 	}
 	// if (queue_is_empty(tp {
 	//     pthread_cond_signal(&tp->cond_var);  // Signal that the task queue is empty
@@ -99,15 +99,14 @@ static void *thread_loop_function(void *arg)
 {
 	os_threadpool_t *tp = (os_threadpool_t *)arg;
 
-	while (1)
-	{
+	while (1) {
 		os_task_t *t;
 		if (tp->oprire == 1)
 			break;
 
 		t = dequeue_task(tp);
-		if (t == NULL)
-		{
+
+		if (t == NULL) {
 			break;
 			tp->oprire = 1;
 		}
@@ -123,8 +122,7 @@ void wait_for_completion(os_threadpool_t *tp)
 {
 	/* TODO: Wait for all worker threads. Use synchronization. */
 
-	while (!list_empty(&tp->head))
-	{
+	while (!list_empty(&tp->head)) {
 		// pthread_cond_wait(&tp->cond_var, &tp->mutex);  // Wait until the task queue is empty
 		if (tp->oprire == 1)
 			break;
@@ -153,8 +151,7 @@ os_threadpool_t *create_threadpool(unsigned int num_threads)
 	tp->num_threads = num_threads;
 	tp->threads = malloc(num_threads * sizeof(*tp->threads));
 	DIE(tp->threads == NULL, "malloc");
-	for (unsigned int i = 0; i < num_threads; ++i)
-	{
+	for (unsigned int i = 0; i < num_threads; ++i) {
 		rc = pthread_create(&tp->threads[i], NULL, &thread_loop_function, (void *)tp);
 		DIE(rc < 0, "pthread_create");
 	}
@@ -172,8 +169,7 @@ void destroy_threadpool(os_threadpool_t *tp)
 	pthread_cond_broadcast(&tp->cond_var);
 	pthread_mutex_unlock(&tp->mutex);
 
-	list_for_each_safe(n, p, &tp->head)
-	{
+	list_for_each_safe(n, p, &tp->head) {
 		list_del(n);
 		destroy_task(list_entry(n, os_task_t, list));
 	}

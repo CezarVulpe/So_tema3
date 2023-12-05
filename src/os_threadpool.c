@@ -10,7 +10,7 @@
 #include "utils.h"
 
 int nrnoduriglobal;
-int nrnodurivizitateblobal = 0;
+int nrnodurivizitateblobal;
 
 void setnrnoduriglobal(int n)
 {

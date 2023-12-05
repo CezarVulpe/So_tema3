@@ -14,8 +14,12 @@ typedef struct {
 } os_task_t;
 
 typedef struct os_threadpool {
+	/* TODO: Define threapool / queue synchronization data. */
 	unsigned int num_threads;
 	pthread_t *threads;
+	pthread_mutex_t mutex;
+    pthread_cond_t cond_var;
+	unsigned int oprire;
 
 	/*
 	 * Head of queue used to store tasks.
@@ -26,11 +30,11 @@ typedef struct os_threadpool {
 	 */
 	os_list_node_t head;
 
-	/* TODO: Define threapool / queue synchronization data. */
 } os_threadpool_t;
 
 os_task_t *create_task(void (*f)(void *), void *arg, void (*destroy_arg)(void *));
 void destroy_task(os_task_t *t);
+void initializarelistaglobala();
 
 os_threadpool_t *create_threadpool(unsigned int num_threads);
 void destroy_threadpool(os_threadpool_t *tp);

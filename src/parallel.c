@@ -18,11 +18,38 @@ static os_graph_t *graph;
 static os_threadpool_t *tp;
 /* TODO: Define graph synchronization mechanisms. */
 
+
+/* Function prototypes */
+static void process_node(unsigned int idx);
+
 /* TODO: Define graph task argument. */
 
 static void process_node(unsigned int idx)
 {
 	/* TODO: Implement thread-pool based processing of graph. */
+	if(idx>graph->num_nodes) return;
+
+	os_node_t *node = graph->nodes[idx];
+
+	for (unsigned int i = 0; i < node->num_neighbours; i++) {
+
+		//if neighbour is not visited, create task for it and add to threadpool
+		if (graph->visited[node->neighbours[i]] == 0) {
+			os_task_t *task = create_task((void *)process_node, (void *)(&(graph->nodes[idx]->neighbours[i])), NULL);
+			enqueue_task(tp, task);
+		}
+	}
+
+	//if node is not visited, mark it as visited and add its value to sum
+	pthread_mutex_lock(&tp->mutex);
+
+	if (graph->visited[idx] == 0) {
+		graph->visited[idx] = 1;
+		sum += node->info;
+		incrementnrvizitate();
+	}
+	pthread_mutex_unlock(&tp->mutex);
+
 }
 
 int main(int argc, char *argv[])
@@ -39,9 +66,18 @@ int main(int argc, char *argv[])
 
 	graph = create_graph_from_file(input_file);
 
+	setnrnoduriglobal(graph->nodes[0]->num_neighbours);
+
 	/* TODO: Initialize graph synchronization mechanisms. */
 	tp = create_threadpool(NUM_THREADS);
-	process_node(0);
+	tp->oprire=0;
+	list_init(&(tp->head));
+	for (unsigned int i = 0; i < graph->num_nodes; i++) {
+		if (graph->visited[i] == 0) {
+			os_task_t *task = create_task((void *)process_node, (void *)(intptr_t)i, NULL);
+			enqueue_task(tp, task);
+		}
+	}
 	wait_for_completion(tp);
 	destroy_threadpool(tp);
 

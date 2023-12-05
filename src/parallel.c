@@ -88,6 +88,7 @@ int main(int argc, char *argv[])
 			{
 				os_task_t *task = create_task((void *)process_node, (void *)(intptr_t)i, NULL);
 				enqueue_task(tp, task);
+				
 			}
 		}
 	}

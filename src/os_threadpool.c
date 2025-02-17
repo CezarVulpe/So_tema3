@@ -10,7 +10,7 @@
 #include "utils.h"
 
 int nrnoduriglobal;
-int nrnodurivizitateblobal = 0;
+int nrnodurivizitateblobal;
 
 void setnrnoduriglobal(int n)
 {
@@ -51,7 +51,7 @@ void enqueue_task(os_threadpool_t *tp, os_task_t *t)
 	assert(t != NULL);
 	pthread_mutex_lock(&tp->mutex);
 	list_add_tail(&(tp->head), &(t->list));
-	pthread_cond_signal(&tp->cond_var);
+	// pthread_cond_signal(&tp->cond_var);
 	pthread_mutex_unlock(&tp->mutex);
 
 	/* TODO: Enqueue task to the shared task queue. Use synchronization. */
@@ -82,6 +82,7 @@ os_task_t *dequeue_task(os_threadpool_t *tp)
 	t = NULL;
 	if (!queue_is_empty(tp)) {
 		os_list_node_t *node = tp->head.next;
+
 		list_del(node);
 		t = list_entry(node, os_task_t, list);
 
@@ -101,6 +102,7 @@ static void *thread_loop_function(void *arg)
 
 	while (1) {
 		os_task_t *t;
+
 		if (tp->oprire == 1)
 			break;
 
@@ -124,8 +126,8 @@ void wait_for_completion(os_threadpool_t *tp)
 
 	while (!list_empty(&tp->head)) {
 		// pthread_cond_wait(&tp->cond_var, &tp->mutex);  // Wait until the task queue is empty
-		if (tp->oprire == 1)
-			break;
+		// if (tp->oprire == 1)
+		// 	break;
 	}
 	tp->oprire = 1;
 	/* Join all worker threads. */
@@ -165,9 +167,9 @@ void destroy_threadpool(os_threadpool_t *tp)
 	os_list_node_t *n, *p;
 
 	/* TODO: Cleanup synchronization data. */
-	pthread_mutex_lock(&tp->mutex);
-	pthread_cond_broadcast(&tp->cond_var);
-	pthread_mutex_unlock(&tp->mutex);
+	// pthread_mutex_lock(&tp->mutex);
+	// pthread_cond_broadcast(&tp->cond_var);
+	// pthread_mutex_unlock(&tp->mutex);
 
 	list_for_each_safe(n, p, &tp->head) {
 		list_del(n);
